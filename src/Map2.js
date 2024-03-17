@@ -8,8 +8,11 @@ import Search from "@arcgis/core/widgets/Search";
 
 import "@arcgis/core/assets/esri/themes/light/main.css";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+import Graphic from "@arcgis/core/Graphic";
 
 let view = null;
+let graphicsLayer = null;
 export default function Map2() {
 
     const mapDiv = useRef(null);
@@ -20,6 +23,8 @@ export default function Map2() {
             const map = new Map({
                 basemap: "arcgis-topographic" // Basemap layer
             });
+            graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
 
             view = new MapView({
                 container: mapDiv.current,
@@ -52,31 +57,54 @@ export default function Map2() {
             { center: [-114, 39] },
             { duration: 5000 }
         )
-
-
-        view.popupEnabled = false;  // Disable the default popup behavior
-
-        view.on("click", function(event) { // Listen for the click event
-            view.hitTest(event).then(function (hitTestResults){ // Search for features where the user clicked
-                if(hitTestResults.results) {
-                    console.log(hitTestResults)
-                    view.openPopup({ // open a popup to show some of the results
-                        location: event.mapPoint,
-                        title: "Hit Test Results",
-                        content: hitTestResults.results.length + "Features Found"
-                    });
-                }
-            })
-        });
     }
 
     function handleImagery() {
         view.map.basemap = 'arcgis/imagery';
     }
 
+    function handleAddPoint() {
+        const point = { //Create a point
+            type: "point",
+            longitude: -118.80657463861,
+            latitude: 34.0005930608889
+        };
+        const simpleMarkerSymbol = {
+            type: "simple-marker",
+            color: [226, 119, 40],  // Orange
+            outline: {
+                color: [255, 255, 255], // White
+                width: 1
+            }
+        };
+
+        const popupTemplate = {
+            title: "{Name}",
+            content: "{Description}"
+        }
+        const attributes = {
+            Name: "Point",
+            Description: "I am a point"
+        }
+
+        const pointGraphic = new Graphic({
+            geometry: point,
+            symbol: simpleMarkerSymbol,
+            attributes,
+            popupTemplate,
+        });
+        graphicsLayer.add(pointGraphic);
+
+        view.goTo(                           // go to point with a custom animation duration
+            { center: [-118.8065, 34.0005] },
+            { duration: 0 }
+        )
+    }
+
     return <>
         <button onClick={handleGo}>Go</button>
         <button onClick={handleImagery}>arcgis/imagery</button>
+        <button onClick={handleAddPoint}>Add Point</button>
         <div className="mapDiv" ref={mapDiv}></div>
         </>;
 }
