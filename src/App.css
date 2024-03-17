@@ -2,6 +2,13 @@
   text-align: center;
 }
 
+.mapDiv {
+  padding: 0;
+  margin: 0;
+  height: 800px;
+  width: 800px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
